@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Services/" />
+  <Folder Name="/Services/Catalog/">
+    <Project Path="services/catalog/OpenLend.Catalog.Api/OpenLend.Catalog.Api.csproj" Id="bfec5214-3dba-48a3-82af-265e9b7898f7" />
+    <Project Path="services/catalog/OpenLend.Catalog.Application/OpenLend.Catalog.Application.csproj" Id="4f5cda37-7305-4862-9f88-411f48e3e218" />
+    <Project Path="services/catalog/OpenLend.Catalog.Domain/OpenLend.Catalog.Domain.csproj" Id="2a96b379-a99c-41de-ae01-d10d46c4757f" />
+    <Project Path="services/catalog/OpenLend.Catalog.Infrastructure/OpenLend.Catalog.Infrastructure.csproj" Id="b7c910fa-bac1-42ba-93cc-dcd273249e5c" />
+  </Folder>
+  <Folder Name="/Tests/" />
+  <Folder Name="/Tests/Catalog/">
+    <Project Path="tests/catalog/OpenLend.Catalog.IntegrationTests/OpenLend.Catalog.IntegrationTests.csproj" Id="f6657c4b-818f-4a34-a3ed-de3a20a388e3" />
+    <Project Path="tests/catalog/OpenLend.Catalog.UnitTests/OpenLend.Catalog.UnitTests.csproj" Id="2fd81581-837d-4ad2-a640-9f4db1eb72ab" />
+  </Folder>
+</Solution>

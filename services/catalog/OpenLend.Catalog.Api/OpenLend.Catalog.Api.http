@@ -1,0 +1,6 @@
+@OpenLend.Catalog.Api_HostAddress = http://localhost:5293
+
+GET {{OpenLend.Catalog.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

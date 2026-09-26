@@ -6,12 +6,10 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
-    
-    <!-- Temporary until this project contains real tests. -->
-    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --ignore-exit-code 8</TestingPlatformCommandLineArguments>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Testcontainers.MySql" Version="4.15.0" />
     <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.0" />
     <PackageReference Include="coverlet.MTP" Version="10.0.1" />
   </ItemGroup>

@@ -16,8 +16,4 @@
     <ProjectReference Include="..\OpenLend.Catalog.Infrastructure\OpenLend.Catalog.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>

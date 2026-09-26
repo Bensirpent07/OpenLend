@@ -8,21 +8,22 @@ namespace OpenLend.Catalog.UnitTests.CatalogItems;
 public sealed class CatalogItemServiceTests
 {
     [Fact]
-    public async Task CreateAsync_WithValidInput_AddsCatalogItem()
+    public async Task CreateAsync_WithValidInput_ReturnsAndAddsCatalogItem()
     {
-        // Arrange
         var repository = new Mock<ICatalogItemRepository>();
         var service = new CatalogItemService(repository.Object);
 
-        // Act
-        await service.CreateAsync("Test Item", "Test Description", TestContext.Current.CancellationToken);
+        var item = await service.CreateAsync("Test Item", "Test Description", TestContext.Current.CancellationToken);
 
-        // Assert
+        Assert.NotEqual(Guid.Empty, item.Id);
+        Assert.Equal("Test Item", item.Name);
+        Assert.Equal("Test Description", item.Description);
+        Assert.True(item.IsActive);
+
         repository.Verify(
             x => x.AddAsync(
-                It.Is<CatalogItem>(item =>
-                    item.Name == "Test Item" &&
-                    item.Description == "Test Description"),
+                It.Is<CatalogItem>(catalogItem =>
+                    catalogItem.Id == item.Id),
                 TestContext.Current.CancellationToken),
             Times.Once);
     }

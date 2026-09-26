@@ -1,3 +1,4 @@
+using OpenLend.Catalog.Application.CatalogItems;
 using OpenLend.Catalog.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ var catalogConnectionString =
         "Connection string 'CatalogDatabase' was not foind.");
 
 builder.Services.AddInfrastructure(catalogConnectionString);
+builder.Services.AddScoped<CatalogItemService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

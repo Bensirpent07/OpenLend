@@ -1,4 +1,5 @@
 ﻿using OpenLend.Catalog.Domain.CatalogItems;
+using OpenLend.Catalog.Domain.Exceptions;
 
 namespace OpenLend.Catalog.UnitTests.CatalogItems;
 public sealed class CatalogItemTests
@@ -8,7 +9,7 @@ public sealed class CatalogItemTests
     {
         var name = new string('A', 201);
         CatalogItem Act() => new(name);
-        var exception = Assert.Throws<ArgumentException>(Act);
+        var exception = Assert.Throws<DomainValidationException>(Act);
         Assert.Equal("name", exception.ParamName);
     }
 
@@ -18,7 +19,7 @@ public sealed class CatalogItemTests
         var name = "Valid Name";
         var description = new string('A', 2001);
         CatalogItem Act() => new(name, description);
-        var exception = Assert.Throws<ArgumentException>(Act);
+        var exception = Assert.Throws<DomainValidationException>(Act);
         Assert.Equal("description", exception.ParamName);
     }
 }

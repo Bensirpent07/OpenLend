@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using OpenLend.Catalog.Domain.Exceptions;
+
 namespace OpenLend.Catalog.Domain.CatalogItems;
 
 public sealed class CatalogItem
@@ -19,7 +21,7 @@ public sealed class CatalogItem
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException(
+            throw new DomainValidationException(
                 "Catalog item name is required.",
                 nameof(name));
         }
@@ -27,7 +29,7 @@ public sealed class CatalogItem
         var trimmedName = name.Trim();
         if (trimmedName.Length > MaxNameLength)
         {
-            throw new ArgumentException(
+            throw new DomainValidationException(
                 $"Catalog item name cannot exceed {MaxNameLength} characters.",
                 nameof(name));
         }
@@ -35,7 +37,7 @@ public sealed class CatalogItem
         var trimmedDescription = description?.Trim();
         if (trimmedDescription != null && trimmedDescription.Length > MaxDescriptionLength)
         {
-            throw new ArgumentException(
+            throw new DomainValidationException(
                 $"Catalog item description cannot exceed {MaxDescriptionLength} characters.",
                 nameof(description));
         }

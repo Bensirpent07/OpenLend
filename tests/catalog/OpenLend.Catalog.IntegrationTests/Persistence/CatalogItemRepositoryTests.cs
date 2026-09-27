@@ -1,29 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OpenLend.Catalog.Domain.CatalogItems;
-using OpenLend.Catalog.Infrastructure.Persistence;
 using OpenLend.Catalog.Infrastructure.Persistence.Repositories;
-
-using Testcontainers.MySql;
+using OpenLend.Catalog.IntegrationTests.Fixtures;
 
 namespace OpenLend.Catalog.IntegrationTests.Persistence;
 
-public sealed class CatalogItemRepositoryTests
+[Collection<CatalogIntegrationCollection>]
+public sealed class CatalogItemRepositoryTests(CatalogIntegrationFixture fixture) : IntegrationTestBase(fixture)
 {
     [Fact]
     public async Task AddAsync_PersistsCatalogItem()
     {
         var ct = TestContext.Current.CancellationToken;
-        await using var mysql = new MySqlBuilder("mysql:8.4.11")
-            .Build();
-        await mysql.StartAsync(ct);
-
-        var options = new DbContextOptionsBuilder<CatalogDbContext>()
-                .UseMySQL(mysql.GetConnectionString())
-                .Options;
-
-        await using var dbContext = new CatalogDbContext(options);
-        await dbContext.Database.MigrateAsync(ct);
-
+        await using var dbContext = Fixture.CreateDbContext();
         var repository = new CatalogItemRepository(dbContext);
         var item = new CatalogItem(
             "Cordless Drill",

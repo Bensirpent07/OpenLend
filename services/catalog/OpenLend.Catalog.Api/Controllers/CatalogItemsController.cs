@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Ardalis.Result;
+using Ardalis.Result.AspNetCore;
+
+using Microsoft.AspNetCore.Mvc;
 
 using OpenLend.Catalog.Api.Dtos.CatalogItems;
 using OpenLend.Catalog.Api.Mappers;
@@ -12,12 +15,24 @@ public sealed class CatalogItemsController(CatalogItemService service) : Control
 {
     [HttpPost]
     [ProducesResponseType<CreateCatalogItemResponse>(StatusCodes.Status201Created)]
-    public async Task<ActionResult<CreateCatalogItemResponse>> CreateAsync(CreateCatalogItemRequest request, CancellationToken ct)
+    public async Task<ActionResult<CreateCatalogItemResponse>> CreateAsync(
+    CreateCatalogItemRequest request,
+    CancellationToken ct)
     {
-        var item = await service.CreateAsync(request.Name, request.Description, ct);
+        var result = await service.CreateAsync(
+            request.Name,
+            request.Description,
+            ct);
 
-        var response = CatalogItemMapper.ToCreateResponse(item);
+        var responseResult = result.Map(CatalogItemMapper.ToCreateResponse);
 
-        return Created($"/api/catalog/items/{item.Id}", response);
+        if (!responseResult.IsSuccess)
+        {
+            return responseResult.ToActionResult(this);
+        }
+
+        var response = responseResult.Value;
+
+        return Created($"/api/catalog/items/{response.Id}", response);
     }
 }

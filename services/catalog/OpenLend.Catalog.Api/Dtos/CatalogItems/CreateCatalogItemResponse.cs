@@ -1,4 +1,4 @@
-﻿namespace OpenLend.Catalog.Api.Contracts.CatalogItems;
+﻿namespace OpenLend.Catalog.Api.Dtos.CatalogItems;
 
 public sealed record CreateCatalogItemResponse(
     Guid Id,

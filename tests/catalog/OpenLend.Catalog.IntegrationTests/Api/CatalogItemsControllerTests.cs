@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using OpenLend.Catalog.Api.Contracts.CatalogItems;
+using OpenLend.Catalog.Api.Dtos.CatalogItems;
 using OpenLend.Catalog.Infrastructure.Persistence;
 
 using Testcontainers.MySql;

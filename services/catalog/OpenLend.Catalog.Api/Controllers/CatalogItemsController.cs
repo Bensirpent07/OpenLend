@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-using OpenLend.Catalog.Api.Contracts.CatalogItems;
+using OpenLend.Catalog.Api.Dtos.CatalogItems;
 using OpenLend.Catalog.Application.CatalogItems;
 
 namespace OpenLend.Catalog.Api.Controllers;

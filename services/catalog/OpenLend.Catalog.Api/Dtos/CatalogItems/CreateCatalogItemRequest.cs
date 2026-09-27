@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace OpenLend.Catalog.Api.Contracts.CatalogItems;
+namespace OpenLend.Catalog.Api.Dtos.CatalogItems;
 
 public sealed class CreateCatalogItemRequest
 {

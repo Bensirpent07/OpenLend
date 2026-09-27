@@ -1,4 +1,3 @@
-using OpenLend.Catalog.Api.ExceptionHandling;
 using OpenLend.Catalog.Application.CatalogItems;
 using OpenLend.Catalog.Infrastructure;
 
@@ -7,13 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var catalogConnectionString =
     builder.Configuration.GetConnectionString("CatalogDatabase")
-    ?? throw new InvalidOperationException(
-        "Connection string 'CatalogDatabase' was not foind.");
+    ?? throw new InvalidOperationException("Connection string 'CatalogDatabase' was not found.");
 
 builder.Services.AddInfrastructure(catalogConnectionString);
 builder.Services.AddScoped<CatalogItemService>();
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<DomainValidationExceptionHandler>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

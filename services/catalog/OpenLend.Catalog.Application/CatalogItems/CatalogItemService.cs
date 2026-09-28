@@ -22,4 +22,16 @@ public sealed class CatalogItemService(ICatalogItemRepository repository)
 
         return result;
     }
+
+    public async Task<Result<CatalogItem>> GetByIdAsync(Guid id, CancellationToken ct)
+    {
+        var item = await repository.GetByIdAsync(id, ct);
+
+        if (item is null)
+        {
+            return Result<CatalogItem>.NotFound();
+        }
+
+        return Result<CatalogItem>.Success(item);
+    }
 }

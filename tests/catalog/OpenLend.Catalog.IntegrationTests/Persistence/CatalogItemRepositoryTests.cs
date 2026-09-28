@@ -39,4 +39,37 @@ public sealed class CatalogItemRepositoryTests(
         Assert.Equal("18V drill", savedItem.Description);
         Assert.True(savedItem.IsActive);
     }
+
+    [Fact]
+    public async Task GetByIdAsync_RetrievesCatalogItem()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var result = CatalogItem.Create(
+            "Cordless Drill",
+            "18V drill");
+
+        Assert.True(result.IsSuccess);
+
+        var item = result.Value;
+
+        await using (var setupContext = Fixture.CreateDbContext())
+        {
+            setupContext.CatalogItems.Add(item);
+            await setupContext.SaveChangesAsync(ct);
+        }
+
+        await using var dbContext = Fixture.CreateDbContext();
+
+        var repository = new CatalogItemRepository(dbContext);
+
+        var retrievedItem =
+            await repository.GetByIdAsync(item.Id, ct);
+
+        Assert.NotNull(retrievedItem);
+        Assert.Equal(item.Id, retrievedItem.Id);
+        Assert.Equal(item.Name, retrievedItem.Name);
+        Assert.Equal(item.Description, retrievedItem.Description);
+        Assert.Equal(item.IsActive, retrievedItem.IsActive);
+    }
 }

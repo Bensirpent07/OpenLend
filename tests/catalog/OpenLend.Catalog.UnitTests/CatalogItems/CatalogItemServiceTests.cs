@@ -56,4 +56,27 @@ public sealed class CatalogItemServiceTests
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }
+
+    [Fact]
+    public async Task GetByIdAsync_WhenItemDoesNotExist_ReturnsNotFound()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var id = Guid.NewGuid();
+
+        var repository = new Mock<ICatalogItemRepository>();
+
+        repository
+            .Setup(x => x.GetByIdAsync(id, ct))
+            .ReturnsAsync((CatalogItem?)null);
+
+        var service = new CatalogItemService(repository.Object);
+
+        var result = await service.GetByIdAsync(id, ct);
+
+        Assert.Equal(ResultStatus.NotFound, result.Status);
+
+        repository.Verify(
+            x => x.GetByIdAsync(id, ct),
+            Times.Once);
+    }
 }

@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 
 using OpenLend.Catalog.Api.Dtos.CatalogItems;
+using OpenLend.Catalog.Domain.CatalogItems;
 using OpenLend.Catalog.IntegrationTests.Fixtures;
 
 namespace OpenLend.Catalog.IntegrationTests.Api;
@@ -71,5 +72,54 @@ public sealed class CatalogItemsControllerTests(
         await using var dbContext = Fixture.CreateDbContext();
 
         Assert.Empty(await dbContext.CatalogItems.ToListAsync(ct));
+    }
+
+    [Fact]
+    public async Task Get_WithValidId_ReturnsRequestedItem()
+    {
+        // Arrange
+        var ct = TestContext.Current.CancellationToken;
+
+        var result = CatalogItem.Create(
+            "Cordless Drill",
+            "18V drill");
+
+        Assert.True(result.IsSuccess);
+
+        var item = result.Value;
+
+        await using (var dbContext = Fixture.CreateDbContext())
+        {
+            dbContext.CatalogItems.Add(item);
+            await dbContext.SaveChangesAsync(ct);
+        }
+
+        // Act
+        var response = await Fixture.Client.GetAsync(
+            $"/api/catalog/items/{item.Id}",
+            ct);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var responseBody =
+            await response.Content.ReadFromJsonAsync<GetCatalogItemResponse>(
+                cancellationToken: ct);
+
+        Assert.NotNull(responseBody);
+        Assert.Equal(item.Id, responseBody.Id);
+        Assert.Equal(item.Name, responseBody.Name);
+        Assert.Equal(item.Description, responseBody.Description);
+        Assert.Equal(item.IsActive, responseBody.IsActive);
+    }
+
+    [Fact]
+    public async Task Get_WithNonexistentId_ReturnsNotFound()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var response = await Fixture.Client.GetAsync(
+            $"/api/catalog/items/{Guid.NewGuid()}",
+            ct);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

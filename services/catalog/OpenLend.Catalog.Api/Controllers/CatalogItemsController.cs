@@ -13,6 +13,25 @@ namespace OpenLend.Catalog.Api.Controllers;
 [ApiController]
 public sealed class CatalogItemsController(CatalogItemService service) : ControllerBase
 {
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(GetCatalogItemResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<GetCatalogItemResponse>> GetByIdAsync(Guid id, CancellationToken ct)
+    {
+        var result = await service.GetByIdAsync(id, ct);
+
+        var responseResult = result.Map(CatalogItemMapper.ToGetResponse);
+
+        if (!responseResult.IsSuccess)
+        {
+            return responseResult.ToActionResult(this);
+        }
+
+        var response = responseResult.Value;
+
+        return Ok(response);
+    }
+
     [HttpPost]
     [ProducesResponseType<CreateCatalogItemResponse>(StatusCodes.Status201Created)]
     public async Task<ActionResult<CreateCatalogItemResponse>> CreateAsync(

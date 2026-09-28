@@ -10,4 +10,9 @@ public sealed class CatalogItemRepository(CatalogDbContext dbContext) : ICatalog
         dbContext.CatalogItems.Add(item);
         await dbContext.SaveChangesAsync(ct);
     }
+
+    public async Task<CatalogItem?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        return await dbContext.CatalogItems.FindAsync([id], ct);
+    }
 }

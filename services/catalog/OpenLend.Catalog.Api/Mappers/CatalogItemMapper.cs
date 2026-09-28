@@ -9,4 +9,5 @@ namespace OpenLend.Catalog.Api.Mappers;
 public static partial class CatalogItemMapper
 {
     public static partial CreateCatalogItemResponse ToCreateResponse(CatalogItem item);
+    public static partial GetCatalogItemResponse ToGetResponse(CatalogItem item);
 }

@@ -42,7 +42,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
     }
 
     [Fact]
-    public async Task Get_WithTopAndSkip_ReturnsRequestedItems()
+    public async Task Get_WithPaging_ReturnsRequestedItems()
     {
         var ct = TestContext.Current.CancellationToken;
         var firstResult = CatalogItem.Create("Circular Saw", "Cordless saw");
@@ -76,17 +76,9 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
     public async Task Get_WithFilter_ReturnsMatchingItems()
     {
         var ct = TestContext.Current.CancellationToken;
-        var firstResult = CatalogItem.Create(
-            "Circular Saw",
-            "Cordless saw");
-
-        var secondResult = CatalogItem.Create(
-            "Cordless Drill",
-            "18v drill");
-
-        var thirdResult = CatalogItem.Create(
-            "Hammer",
-            "Claw Hammer");
+        var firstResult = CatalogItem.Create("Circular Saw", "Cordless saw");
+        var secondResult = CatalogItem.Create("Cordless Drill", "18v drill");
+        var thirdResult = CatalogItem.Create("Hammer", "Claw Hammer");
 
         Assert.True(firstResult.IsSuccess);
         Assert.True(secondResult.IsSuccess);
@@ -102,9 +94,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
             await dbContext.SaveChangesAsync(ct);
         }
 
-        var response = await Fixture.Client.GetAsync(
-            "/odata/CatalogItems?$filter=contains(Name,'Cordless')&$count=true",
-            ct);
+        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$filter=contains(Name,'Cordless')&$count=true", ct);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var json = await response.Content.ReadAsStringAsync(ct);
@@ -115,5 +105,43 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
         Assert.Equal(1, root.GetProperty("@odata.count").GetInt32());
         Assert.Equal(1, items.GetArrayLength());
         Assert.Equal("Cordless Drill", items[0].GetProperty("Name").GetString());
+    }
+
+    [Fact]
+    public async Task Get_WithSelect_ReturnsOnlyRequestedProperties()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var result = CatalogItem.Create("Cordless Drill", "18v drill");
+        Assert.True(result.IsSuccess);
+
+        await using (var dbContext = Fixture.CreateDbContext())
+        {
+            dbContext.Add(result.Value);
+            await dbContext.SaveChangesAsync(ct);
+        }
+
+        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$select=Id,Name", ct);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var json = await response.Content.ReadAsStringAsync(ct);
+        using var document = JsonDocument.Parse(json);
+
+        var item = document.RootElement.GetProperty("value")[0];
+
+        Assert.True(item.TryGetProperty("Id", out _));
+        Assert.True(item.TryGetProperty("Name", out _));
+
+        Assert.False(item.TryGetProperty("Description", out _));
+        Assert.False(item.TryGetProperty("IsActive", out _));
+        Assert.False(item.TryGetProperty("CreatedAtUtc", out _));
+    }
+
+    [Fact]
+    public async Task Get_WithTopGreaterThanMaximum_ReturnsBadRequest()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$top=101", ct);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }

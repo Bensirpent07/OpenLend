@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 
 using OpenLend.Catalog.Domain.CatalogItems;
 using OpenLend.Catalog.IntegrationTests.Fixtures;
@@ -29,5 +30,17 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
         var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$orderby=Name&$top=2&$count=true", ct);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var json = await response.Content.ReadAsStringAsync(ct);
+
+        using var document = JsonDocument.Parse(json);
+
+        var root = document.RootElement;
+
+        Assert.Equal(3, root.GetProperty("@odata.count").GetInt32());
+        var items = root.GetProperty("value");
+        Assert.Equal(2, items.GetArrayLength());
+        Assert.Equal("Circular Saw", items[0].GetProperty("Name").GetString());
+        Assert.Equal("Cordless Drill", items[1].GetProperty("Name").GetString());
     }
 }

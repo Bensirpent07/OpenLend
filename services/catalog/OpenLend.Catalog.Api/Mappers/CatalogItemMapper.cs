@@ -8,6 +8,6 @@ namespace OpenLend.Catalog.Api.Mappers;
 [Mapper]
 public static partial class CatalogItemMapper
 {
-    public static partial CreateCatalogItemResponse ToCreateResponse(CatalogItem item);
-    public static partial GetCatalogItemResponse ToGetResponse(CatalogItem item);
+    public static partial CatalogItemResponse ToResponse(CatalogItem item);
+    public static partial IQueryable<CatalogItemResponse> ToResponse(IQueryable<CatalogItem> items);
 }

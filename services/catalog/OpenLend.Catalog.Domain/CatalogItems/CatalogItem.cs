@@ -9,6 +9,7 @@ public sealed class CatalogItem
     private const int MaxNameLength = 200;
     private const int MaxDescriptionLength = 2000;
 
+    [Key]
     public Guid Id { get; private set; }
 
     [MaxLength(MaxNameLength)]

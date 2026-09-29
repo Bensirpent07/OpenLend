@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.OData;
+using Microsoft.OData.ModelBuilder;
+
+using OpenLend.Catalog.Api.Dtos.CatalogItems;
 using OpenLend.Catalog.Application.CatalogItems;
 using OpenLend.Catalog.Infrastructure;
 
@@ -12,7 +16,25 @@ builder.Services.AddInfrastructure(catalogConnectionString);
 builder.Services.AddScoped<CatalogItemService>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddControllers();
+var odataModelBuilder = new ODataConventionModelBuilder();
+
+odataModelBuilder.EntitySet<CatalogItemResponse>("CatalogItems");
+
+builder.Services
+    .AddControllers()
+    .AddOData(options =>
+    {
+        options
+            .Select()
+            .Filter()
+            .OrderBy()
+            .Count()
+            .SetMaxTop(100);
+
+        options.AddRouteComponents(
+            "odata",
+            odataModelBuilder.GetEdmModel());
+    });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

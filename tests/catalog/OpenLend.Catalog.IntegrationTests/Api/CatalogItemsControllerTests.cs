@@ -31,7 +31,7 @@ public sealed class CatalogItemsControllerTests(
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
         var responseBody =
-            await response.Content.ReadFromJsonAsync<CreateCatalogItemResponse>(
+            await response.Content.ReadFromJsonAsync<CatalogItemResponse>(
                 cancellationToken: ct);
 
         Assert.NotNull(responseBody);
@@ -103,7 +103,7 @@ public sealed class CatalogItemsControllerTests(
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var responseBody =
-            await response.Content.ReadFromJsonAsync<GetCatalogItemResponse>(
+            await response.Content.ReadFromJsonAsync<CatalogItemResponse>(
                 cancellationToken: ct);
 
         Assert.NotNull(responseBody);

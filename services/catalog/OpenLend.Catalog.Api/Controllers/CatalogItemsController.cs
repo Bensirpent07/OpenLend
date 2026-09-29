@@ -14,13 +14,13 @@ namespace OpenLend.Catalog.Api.Controllers;
 public sealed class CatalogItemsController(CatalogItemService service) : ControllerBase
 {
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(GetCatalogItemResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CatalogItemResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GetCatalogItemResponse>> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<ActionResult<CatalogItemResponse>> GetByIdAsync(Guid id, CancellationToken ct)
     {
         var result = await service.GetByIdAsync(id, ct);
 
-        var responseResult = result.Map(CatalogItemMapper.ToGetResponse);
+        var responseResult = result.Map(CatalogItemMapper.ToResponse);
 
         if (!responseResult.IsSuccess)
         {
@@ -33,8 +33,8 @@ public sealed class CatalogItemsController(CatalogItemService service) : Control
     }
 
     [HttpPost]
-    [ProducesResponseType<CreateCatalogItemResponse>(StatusCodes.Status201Created)]
-    public async Task<ActionResult<CreateCatalogItemResponse>> CreateAsync(
+    [ProducesResponseType<CatalogItemResponse>(StatusCodes.Status201Created)]
+    public async Task<ActionResult<CatalogItemResponse>> CreateAsync(
     CreateCatalogItemRequest request,
     CancellationToken ct)
     {
@@ -43,7 +43,7 @@ public sealed class CatalogItemsController(CatalogItemService service) : Control
             request.Description,
             ct);
 
-        var responseResult = result.Map(CatalogItemMapper.ToCreateResponse);
+        var responseResult = result.Map(CatalogItemMapper.ToResponse);
 
         if (!responseResult.IsSuccess)
         {

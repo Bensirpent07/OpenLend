@@ -16,7 +16,8 @@ builder.Services.AddInfrastructure(catalogConnectionString);
 builder.Services.AddScoped<CatalogItemService>();
 builder.Services.AddProblemDetails();
 
-var odataModelBuilder = new ODataConventionModelBuilder();
+var odataModelBuilder = new ODataConventionModelBuilder()
+    .EnableLowerCamelCase();
 
 odataModelBuilder.EntitySet<CatalogItemResponse>("CatalogItems");
 

@@ -24,7 +24,7 @@ describe('CatalogService', () => {
   });
 
   it('requests catalog items with the supplied OData query', async () => {
-    const query = '$orderby=Name&$top=20&$count=true';
+    const query = '$orderby=name&$top=20&$count=true';
     const responsePromise = firstValueFrom(
       service.getCatalogItems(query),
     );

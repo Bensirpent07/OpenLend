@@ -27,7 +27,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
             await dbContext.SaveChangesAsync(ct);
         }
 
-        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$orderby=Name&$top=2&$count=true", ct);
+        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$orderby=name&$top=2&$count=true", ct);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var json = await response.Content.ReadAsStringAsync(ct);
@@ -37,8 +37,8 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
         Assert.Equal(3, root.GetProperty("@odata.count").GetInt32());
         var items = root.GetProperty("value");
         Assert.Equal(2, items.GetArrayLength());
-        Assert.Equal("Circular Saw", items[0].GetProperty("Name").GetString());
-        Assert.Equal("Cordless Drill", items[1].GetProperty("Name").GetString());
+        Assert.Equal("Circular Saw", items[0].GetProperty("name").GetString());
+        Assert.Equal("Cordless Drill", items[1].GetProperty("name").GetString());
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
             await dbContext.SaveChangesAsync(ct);
         }
 
-        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$orderby=Name&$skip=1&$top=1&$count=true", ct);
+        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$orderby=name&$skip=1&$top=1&$count=true", ct);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var json = await response.Content.ReadAsStringAsync(ct);
@@ -69,7 +69,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
         Assert.Equal(3, root.GetProperty("@odata.count").GetInt32());
         var items = root.GetProperty("value");
         Assert.Equal(1, items.GetArrayLength());
-        Assert.Equal("Cordless Drill", items[0].GetProperty("Name").GetString());
+        Assert.Equal("Cordless Drill", items[0].GetProperty("name").GetString());
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
             await dbContext.SaveChangesAsync(ct);
         }
 
-        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$filter=contains(Name,'Cordless')&$count=true", ct);
+        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$filter=contains(name,'Cordless')&$count=true", ct);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var json = await response.Content.ReadAsStringAsync(ct);
@@ -104,7 +104,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
 
         Assert.Equal(1, root.GetProperty("@odata.count").GetInt32());
         Assert.Equal(1, items.GetArrayLength());
-        Assert.Equal("Cordless Drill", items[0].GetProperty("Name").GetString());
+        Assert.Equal("Cordless Drill", items[0].GetProperty("name").GetString());
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
             await dbContext.SaveChangesAsync(ct);
         }
 
-        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$select=Id,Name", ct);
+        var response = await Fixture.Client.GetAsync("/odata/CatalogItems?$select=id,name", ct);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var json = await response.Content.ReadAsStringAsync(ct);
@@ -128,12 +128,12 @@ public sealed class CatalogItemsODataControllerTests(CatalogIntegrationFixture f
 
         var item = document.RootElement.GetProperty("value")[0];
 
-        Assert.True(item.TryGetProperty("Id", out _));
-        Assert.True(item.TryGetProperty("Name", out _));
+        Assert.True(item.TryGetProperty("id", out _));
+        Assert.True(item.TryGetProperty("name", out _));
 
-        Assert.False(item.TryGetProperty("Description", out _));
-        Assert.False(item.TryGetProperty("IsActive", out _));
-        Assert.False(item.TryGetProperty("CreatedAtUtc", out _));
+        Assert.False(item.TryGetProperty("description", out _));
+        Assert.False(item.TryGetProperty("isActive", out _));
+        Assert.False(item.TryGetProperty("createdAtUtc", out _));
     }
 
     [Fact]

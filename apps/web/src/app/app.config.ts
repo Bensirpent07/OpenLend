@@ -6,6 +6,7 @@ import Aura from '@primeuix/themes/aura';
 import { isDevMode } from '@angular/core';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { provideHttpClient } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,5 +23,6 @@ export const appConfig: ApplicationConfig = {
       logOnly: !isDevMode(),
       autoPause: true,
     }),
+    provideHttpClient()
   ],
 };

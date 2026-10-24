@@ -1,0 +1,10 @@
+{
+  "/odata/**": {
+    "target": "http://localhost:5293",
+    "secure": false
+  },
+  "/api/**": {
+    "target": "http://localhost:5293",
+    "secure": false
+  }
+}

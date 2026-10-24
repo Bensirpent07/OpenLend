@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
-import { CatalogPage } from './catalog/pages/catalog-page/catalog-page';
 
 export const routes: Routes = [
   {
     path: 'catalog',
-    component: CatalogPage
+    loadComponent: () =>
+      import('./catalog/pages/catalog-page/catalog-page')
+        .then(m => m.CatalogPage),
   },
   {
     path: '',

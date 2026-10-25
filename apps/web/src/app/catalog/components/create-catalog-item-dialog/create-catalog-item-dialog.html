@@ -1,0 +1,75 @@
+<p-dialog
+  header="Add Equipment"
+  [closable]="!processing()"
+  [closeOnEscape]="!processing()"
+  (onHide)="closeAndResetForm()"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '32rem', maxWidth: '95vw' }"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <label for="item-name" class="font-medium"> Name * </label>
+
+      <input
+        pInputText
+        id="item-name"
+        formControlName="name"
+        class="w-full"
+        maxlength="200"
+        autocomplete="off"
+      />
+
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="text-red-500"> Enter a valid name (maximum 200 characters). </small>
+      }
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="item-description" class="font-medium"> Description </label>
+
+      <textarea
+        pTextarea
+        id="item-description"
+        formControlName="description"
+        class="w-full"
+        rows="4"
+        maxlength="2000"
+      ></textarea>
+    </div>
+
+    @if (errorMessage()) {
+      <small class="text-red-500" role="alert">
+        {{ errorMessage() }}
+      </small>
+    }
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button
+        pButton
+        severity="secondary"
+        [outlined]="true"
+        type="button"
+        [disabled]="processing()"
+        (click)="closeAndResetForm()"
+      >
+        <span pButtonLabel>Cancel</span>
+      </button>
+
+      <button
+        pButton
+        type="submit"
+        [disabled]="form.invalid || processing()"
+        [attr.aria-busy]="processing()"
+      >
+        @if (processing()) {
+          <svg lucideLoaderCircle [size]="16" class="animate-spin" aria-hidden="true"></svg>
+        }
+
+        <span pButtonLabel>
+          {{ processing() ? 'Creating...' : 'Create' }}
+        </span>
+      </button>
+    </div>
+  </form>
+</p-dialog>

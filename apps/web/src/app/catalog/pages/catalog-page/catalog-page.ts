@@ -5,9 +5,11 @@ import { buildODataQuery, ODataQueryState } from '../../../shared/odata/odata-qu
 import { CatalogItem } from '../../models/catalog-item';
 import { finalize } from 'rxjs';
 import { TableModule } from 'primeng/table';
+import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
+import { ButtonDirective } from 'primeng/button';
 
 @Component({
-  imports: [TableModule],
+  imports: [TableModule, CreateCatalogItemDialog, ButtonDirective],
   selector: 'app-catalog-page',
   styleUrl: './catalog-page.scss',
   templateUrl: './catalog-page.html',
@@ -18,6 +20,7 @@ export class CatalogPage {
   public readonly totalRecords = signal(0);
   public readonly loading = signal(false);
   public readonly errorMessage = signal<string | null>(null);
+  public readonly createDialogVisible = signal(false);
 
   public loadCatalog(event: TableLazyLoadEvent): void {
     const queryState: ODataQueryState = this.toODataQueryState(event);

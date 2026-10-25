@@ -3,6 +3,7 @@ import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ODataResponse } from '../models/odata-response';
 import { CatalogItem } from '../models/catalog-item';
+import { CreateCatalogItemRequest } from '../dto/create-catalog-item-request';
 
 @Service()
 export class CatalogService {
@@ -10,5 +11,9 @@ export class CatalogService {
 
   public getCatalogItems(query: string): Observable<ODataResponse<CatalogItem>> {
     return this.http.get<ODataResponse<CatalogItem>>(`/odata/CatalogItems?${query}`);
+  }
+
+  public createCatalogItem(request: CreateCatalogItemRequest): Observable<CatalogItem> {
+    return this.http.post<CatalogItem>(`/api/catalog/items`, request);
   }
 }

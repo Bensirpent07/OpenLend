@@ -7,6 +7,7 @@ import { isDevMode } from '@angular/core';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +17,7 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Aura,
       },
+      license: environment.primeUiLicense
     }),
     provideStore(),
     provideStoreDevtools({

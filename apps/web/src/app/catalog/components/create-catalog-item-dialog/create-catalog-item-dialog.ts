@@ -21,6 +21,9 @@ import { LucideLoaderCircle } from '@lucide/angular';
   selector: 'app-create-catalog-item-dialog',
   styleUrl: './create-catalog-item-dialog.scss',
   templateUrl: './create-catalog-item-dialog.html',
+  host: {
+    '(document:keydown.escape)': 'onEscape()'
+  }
 })
 export class CreateCatalogItemDialog {
   private readonly fb = inject(FormBuilder).nonNullable;
@@ -68,5 +71,10 @@ export class CreateCatalogItemDialog {
     this.visible.set(false);
     this.form.reset();
     this.errorMessage.set('');
+  }
+
+  public onEscape(): void{
+    if (!this.visible() || this.processing()) return;
+    this.closeAndResetForm();
   }
 }

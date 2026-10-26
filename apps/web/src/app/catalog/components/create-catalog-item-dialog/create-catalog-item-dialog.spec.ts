@@ -256,4 +256,35 @@ describe('CreateCatalogItemDialog', () => {
 
     expect(component.errorMessage()).toBe('');
   });
+
+  it('closes the dialog when escape is pressed', async () => {
+    expect(component.visible()).toBe(true);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await fixture.whenStable();
+
+    expect(component.visible()).toBe(false);
+  })
+
+  it('prevents closing the dialog with escape while processing', async () => {
+    const request$ = new Subject<CatalogItem>;
+    catalogServiceStub.createCatalogItem.mockReturnValueOnce(request$);
+    const form = component.form;
+    form.controls.name.setValue("Cordless Drill");
+
+    expect(component.processing()).toBe(false);
+    component.submit();
+    await fixture.whenStable();
+
+    expect(component.processing()).toBe(true);
+    expect(component.visible()).toBe(true);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await fixture.whenStable();
+
+    expect(component.processing()).toBe(true);
+    expect(component.visible()).toBe(true);
+
+    request$.complete();
+  })
 });

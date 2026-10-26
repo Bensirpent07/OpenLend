@@ -1,7 +1,7 @@
 <p-dialog
   header="Add Equipment"
   [closable]="!processing()"
-  [closeOnEscape]="!processing()"
+  [closeOnEscape]="false"
   (onHide)="closeAndResetForm()"
   [(visible)]="visible"
   [modal]="true"

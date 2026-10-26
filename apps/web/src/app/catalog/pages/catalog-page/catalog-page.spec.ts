@@ -6,6 +6,8 @@ import { CatalogService } from '../../services/catalog-service';
 import { CatalogItem } from '../../models/catalog-item';
 import { ODataResponse } from '../../models/odata-response';
 import { Mocked } from 'vitest';
+import { By } from '@angular/platform-browser';
+import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
 
 describe('CatalogPage', () => {
   let component: CatalogPage;
@@ -141,6 +143,28 @@ describe('CatalogPage', () => {
 
     expect(catalogServiceStub.getCatalogItems).toHaveBeenCalledWith(
       '$skip=0&$top=20&$count=true'
+    );
+  })
+
+  it('refreshes the current page and sort order when an item is created', () => {
+    component.loadCatalog({
+      first: 20,
+      rows: 20,
+      sortField: 'name',
+      sortOrder: 1,
+    });
+
+    catalogServiceStub.getCatalogItems.mockClear();
+
+    const dialog = fixture.debugElement
+      .query(By.directive(CreateCatalogItemDialog))
+      .injector.get(CreateCatalogItemDialog);
+
+    dialog.created.emit();
+
+    expect(catalogServiceStub.getCatalogItems).toHaveBeenCalledOnce();
+    expect(catalogServiceStub.getCatalogItems).toHaveBeenCalledWith(
+      '$skip=20&$top=20&$count=true&$orderby=name asc',
     );
   })
 });

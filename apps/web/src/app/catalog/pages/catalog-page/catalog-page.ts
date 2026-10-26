@@ -21,8 +21,14 @@ export class CatalogPage {
   public readonly loading = signal(false);
   public readonly errorMessage = signal<string | null>(null);
   public readonly createDialogVisible = signal(false);
+  private lastLoadEvent: TableLazyLoadEvent = {
+    first: 0,
+    rows: 20
+  };
 
-  public loadCatalog(event: TableLazyLoadEvent): void {
+  public loadCatalog(event: TableLazyLoadEvent = this.lastLoadEvent): void {
+    this.lastLoadEvent = { ...event };
+
     const queryState: ODataQueryState = this.toODataQueryState(event);
     const query = buildODataQuery(queryState);
 

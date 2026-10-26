@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { CatalogService } from './catalog-service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
+import { CreateCatalogItemRequest } from '../dto/create-catalog-item-request';
 
 describe('CatalogService', () => {
   let service: CatalogService;
@@ -54,4 +55,33 @@ describe('CatalogService', () => {
     expect(response.value).toHaveLength(1);
     expect(response.value[0].name).toBe('Cordless Drill');
   });
+
+  it('creates catalog item with supplied request data', async () => {
+    const requestData: CreateCatalogItemRequest = {
+      name: 'Cordless Drill',
+      description: '18V Cordless Drill'
+    }
+
+    const createdItem = {
+      id: '0199a123-4567-7000-8000-000000000001',
+      name: 'Cordless Drill',
+      description: '18V Cordless Drill',
+      isActive: true,
+      createdAtUtc: '2026-10-24T12:00:00Z',
+    };
+
+    const responsePromise = firstValueFrom(service.createCatalogItem(requestData));
+    const request = httpTesting.expectOne({
+      method: 'POST',
+      url: '/api/catalog/items'
+    });
+    expect(request.request.body).toEqual(requestData);
+
+    request.flush(createdItem, {
+      status: 201,
+      statusText: 'Created'
+    });
+
+    expect(await responsePromise).toEqual(createdItem);
+  })
 });

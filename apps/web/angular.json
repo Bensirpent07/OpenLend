@@ -48,6 +48,11 @@
               ],
               "outputHashing": "all"
             },
+            "testing": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -78,7 +83,10 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "openlend-web:build:testing"
+          }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",

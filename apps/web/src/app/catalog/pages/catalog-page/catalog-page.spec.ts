@@ -1,170 +1,160 @@
+import { signal } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CatalogPage } from './catalog-page';
-import { of, Subject } from 'rxjs';
-import { TableLazyLoadEvent } from 'primeng/table';
-import { CatalogService } from '../../services/catalog-service';
-import { CatalogItem } from '../../models/catalog-item';
-import { ODataResponse } from '../../models/odata-response';
-import { Mocked } from 'vitest';
 import { By } from '@angular/platform-browser';
+import { Table } from 'primeng/table';
+import { CatalogPage } from './catalog-page';
+import { CatalogStore } from '../../store/catalog-store';
+import { CatalogItem } from '../../models/catalog-item';
+import { ODataQueryState } from '../../../shared/odata/odata-query';
 import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
 
+function createCatalogStoreStub() {
+  return {
+    items: signal<CatalogItem[]>([]),
+    totalRecords: signal(0),
+    loading: signal(false),
+    errorMessage: signal<string | null>(null),
+    loadCatalog: vi.fn<(query: ODataQueryState) => void>(),
+    refreshCatalog: vi.fn<() => void>(),
+  };
+}
+
 describe('CatalogPage', () => {
-  let component: CatalogPage;
   let fixture: ComponentFixture<CatalogPage>;
-  let catalogServiceStub: Mocked<
-    Pick<CatalogService, 'getCatalogItems'>
-  >;
+  let catalogStoreStub: ReturnType<typeof createCatalogStoreStub>;
+  let table: Table;
+  let dialog: CreateCatalogItemDialog;
 
   beforeEach(async () => {
-    catalogServiceStub = {
-      getCatalogItems: vi.fn<CatalogService['getCatalogItems']>()
-        .mockReturnValue(
-          of({
-            '@odata.count': 0,
-            value: [],
-          }),
-        ),
-    };
+    catalogStoreStub = createCatalogStoreStub();
 
     await TestBed.configureTestingModule({
       imports: [CatalogPage],
       providers: [
-        {
-          provide: CatalogService,
-          useValue: catalogServiceStub
-        }
-      ]
-    }).compileComponents();
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    })
+      .overrideComponent(CatalogPage, {
+        set: {
+          providers: [
+            {
+              provide: CatalogStore,
+              useValue: catalogStoreStub,
+            },
+          ],
+        },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(CatalogPage);
-    component = fixture.componentInstance;
     await fixture.whenStable();
+
+    table = fixture.debugElement
+      .query(By.directive(Table))
+      .injector.get(Table);
+
+    dialog = fixture.debugElement
+      .query(By.directive(CreateCatalogItemDialog))
+      .injector.get(CreateCatalogItemDialog);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('loads catalog items using the table lazy-load state', () => {
-    const event: TableLazyLoadEvent = {
-      first: 10,
-      rows: 20,
-      sortField: 'name',
-      sortOrder: 1
-    }
-
-    component.loadCatalog(event);
-
-    expect(catalogServiceStub.getCatalogItems).toHaveBeenCalledWith(
-      '$skip=10&$top=20&$count=true&$orderby=name asc'
-    )
-  });
-
-  it('stores catalog items and total count', () => {
-    const items: CatalogItem[] = [
-      {
-        id: '0192f7d6-12ab-7000-8000-000000000001',
-        name: 'Cordless Drill',
-        description: '18V cordless drill',
-        isActive: true,
-        createdAtUtc: '2026-10-23T12:00:00Z'
-      }
-    ]
-
-    catalogServiceStub.getCatalogItems.mockReturnValueOnce(
-      of({
-        '@odata.count': 37,
-        value: items
-      })
-    )
-
-    component.loadCatalog({ first: 0, rows: 20 });
-    expect(component.items()).toEqual(items);
-    expect(component.totalRecords()).toEqual(37);
-  });
-
-  it('tracks loading state while fetching catalog itesm', () => {
-    const response$ = new Subject<ODataResponse<CatalogItem>>;
-    catalogServiceStub.getCatalogItems.mockReturnValueOnce(response$);
-    component.loadCatalog({ first: 0, rows: 20})
-    expect(component.loading()).toBe(true);
-    response$.next({
-      '@odata.count': 0,
-      value: []
-    })
-    response$.complete();
-    expect(component.loading()).toBe(false);
-  })
-
-  it('handles error when loading catalog items', () => {
-    const response$ = new Subject<ODataResponse<CatalogItem>>;
-    catalogServiceStub.getCatalogItems.mockReturnValueOnce(response$);
-
-    component.loadCatalog({ first: 0, rows: 20});
-    expect(component.loading()).toBe(true);
-    response$.error(new Error('Test error'));
-    expect(component.loading()).toBe(false);
-    expect(component.errorMessage()).toBe(
-      'Unable to load catalog items.'
-    )
-  })
-
-  it('clears a previous error message when retrying', () => {
-    const initialResponse$ = new Subject<ODataResponse<CatalogItem>>;
-    catalogServiceStub.getCatalogItems.mockReturnValueOnce(initialResponse$);
-
-    component.loadCatalog({ first: 0, rows: 20});
-    expect(component.loading()).toBe(true);
-
-    initialResponse$.error(new Error('Test error'));
-    expect(component.loading()).toBe(false);
-    expect(component.errorMessage()).toBe(
-      'Unable to load catalog items.'
-    )
-
-    const newResponse$ = new Subject<ODataResponse<CatalogItem>>;
-    catalogServiceStub.getCatalogItems.mockReturnValueOnce(newResponse$);
-
-    component.loadCatalog({ first: 0, rows: 20});
-    expect(component.loading()).toBe(true);
-    expect(component.errorMessage()).toBe(null);
-
-    newResponse$.next({
-      "@odata.count": 0,
-      value: []
-    })
-    newResponse$.complete()
-    expect(component.loading()).toBe(false);
-  })
-
-  it('loads the first page when the table initializes', () => {
-    fixture.detectChanges();
-
-    expect(catalogServiceStub.getCatalogItems).toHaveBeenCalledWith(
-      '$skip=0&$top=20&$count=true'
+  it('requests the first page when the table initializes', () => {
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        first: 0,
+        rows: 20,
+        sortField: undefined,
+      }),
     );
-  })
+  });
 
-  it('refreshes the current page and sort order when an item is created', () => {
-    component.loadCatalog({
+  it('passes table paging and sorting changes to the store', () => {
+    catalogStoreStub.loadCatalog.mockClear();
+
+    table.onLazyLoad.emit({
       first: 20,
       rows: 20,
       sortField: 'name',
       sortOrder: 1,
     });
 
-    catalogServiceStub.getCatalogItems.mockClear();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
+      first: 20,
+      rows: 20,
+      sortField: 'name',
+      sortOrder: 1,
+    });
+  });
 
-    const dialog = fixture.debugElement
-      .query(By.directive(CreateCatalogItemDialog))
-      .injector.get(CreateCatalogItemDialog);
+  it('uses default paging and omits an unsupported sort order', () => {
+    catalogStoreStub.loadCatalog.mockClear();
 
+    table.onLazyLoad.emit({
+      sortOrder: 0,
+    });
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
+      first: 0,
+      rows: 20,
+      sortField: undefined,
+      sortOrder: undefined,
+    });
+  });
+
+  it('uses the first sort field when the table supplies an array', () => {
+    catalogStoreStub.loadCatalog.mockClear();
+
+    table.onLazyLoad.emit({
+      first: 0,
+      rows: 20,
+      sortField: ['name', 'description'],
+      sortOrder: -1,
+    });
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
+      first: 0,
+      rows: 20,
+      sortField: 'name',
+      sortOrder: -1,
+    });
+  });
+
+  it('opens the creation dialog when Add Equipment is clicked', async () => {
+    expect(dialog.visible()).toBe(false);
+
+    fixture.debugElement
+      .query(By.css('button'))
+      .triggerEventHandler('click');
+
+    await fixture.whenStable();
+
+    expect(dialog.visible()).toBe(true);
+  });
+
+  it('synchronizes dialog dismissal with the page visibility state', async () => {
+    fixture.debugElement
+      .query(By.css('button'))
+      .triggerEventHandler('click');
+
+    await fixture.whenStable();
+
+    dialog.visible.set(false);
+
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.createDialogVisible()).toBe(false);
+  });
+
+  it('requests a catalog refresh when the dialog emits created', () => {
     dialog.created.emit();
 
-    expect(catalogServiceStub.getCatalogItems).toHaveBeenCalledOnce();
-    expect(catalogServiceStub.getCatalogItems).toHaveBeenCalledWith(
-      '$skip=20&$top=20&$count=true&$orderby=name asc',
-    );
-  })
+    expect(catalogStoreStub.refreshCatalog).toHaveBeenCalledOnce();
+  });
 });

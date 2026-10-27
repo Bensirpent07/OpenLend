@@ -1,12 +1,12 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { routes } from './app.routes';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
-import { isDevMode } from '@angular/core';
-import { provideStore } from '@ngrx/store';
-import { provideStoreDevtools } from '@ngrx/store-devtools';
-import { provideHttpClient } from '@angular/common/http';
+import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
@@ -17,13 +17,7 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Aura,
       },
-      license: environment.primeUiLicense
-    }),
-    provideStore(),
-    provideStoreDevtools({
-      maxAge: 25,
-      logOnly: !isDevMode(),
-      autoPause: true,
+      license: environment.primeUiLicense,
     }),
     provideHttpClient()
   ],

@@ -1,53 +1,34 @@
 import { Component, inject, signal } from '@angular/core';
-import { CatalogService } from '../../services/catalog-service';
 import { TableLazyLoadEvent } from 'primeng/types/table';
-import { buildODataQuery, ODataQueryState } from '../../../shared/odata/odata-query';
-import { CatalogItem } from '../../models/catalog-item';
-import { finalize } from 'rxjs';
+import { ODataQueryState } from '../../../shared/odata/odata-query';
 import { TableModule } from 'primeng/table';
 import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
 import { ButtonDirective } from 'primeng/button';
+import { CatalogStore } from '../../store/catalog-store';
 
 @Component({
   imports: [TableModule, CreateCatalogItemDialog, ButtonDirective],
   selector: 'app-catalog-page',
   styleUrl: './catalog-page.scss',
   templateUrl: './catalog-page.html',
+  providers: [CatalogStore]
 })
 export class CatalogPage {
-  private readonly catalogService = inject(CatalogService);
-  public readonly items = signal<CatalogItem[]>([]);
-  public readonly totalRecords = signal(0);
-  public readonly loading = signal(false);
-  public readonly errorMessage = signal<string | null>(null);
+  private readonly catalogStore = inject(CatalogStore);
+
+  public readonly items = this.catalogStore.items;
+  public readonly totalRecords = this.catalogStore.totalRecords;
+  public readonly loading = this.catalogStore.loading;
+  public readonly errorMessage = this.catalogStore.errorMessage;
+
   public readonly createDialogVisible = signal(false);
-  private lastLoadEvent: TableLazyLoadEvent = {
-    first: 0,
-    rows: 20
-  };
 
-  public loadCatalog(event: TableLazyLoadEvent = this.lastLoadEvent): void {
-    this.lastLoadEvent = { ...event };
+  public loadCatalog(event: TableLazyLoadEvent): void {
+    this.catalogStore.loadCatalog(this.toODataQueryState(event));
+  }
 
-    const queryState: ODataQueryState = this.toODataQueryState(event);
-    const query = buildODataQuery(queryState);
-
-    this.loading.set(true);
-    this.errorMessage.set(null);
-
-    this.catalogService.getCatalogItems(query)
-    .pipe(
-      finalize(() => { this.loading.set(false); })
-    )
-    .subscribe({
-      next: (response) => {
-        this.items.set(response.value)
-        this.totalRecords.set(response['@odata.count'] ?? 0);
-      },
-      error: () => {
-        this.errorMessage.set('Unable to load catalog items.');
-      }
-    });
+  public refreshCatalog(): void{
+    this.catalogStore.refreshCatalog();
   }
 
   private toODataQueryState(event: TableLazyLoadEvent): ODataQueryState {

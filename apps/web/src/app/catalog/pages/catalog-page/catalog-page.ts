@@ -5,13 +5,15 @@ import { TableModule } from 'primeng/table';
 import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
 import { ButtonDirective } from 'primeng/button';
 import { CatalogStore } from '../../store/catalog-store';
+import { PageHeader } from '../../../shared/components/page-header/page-header';
+import { TableWrapper } from '../../../shared/components/table-wrapper/table-wrapper';
 
 @Component({
-  imports: [TableModule, CreateCatalogItemDialog, ButtonDirective],
+  imports: [TableModule, CreateCatalogItemDialog, ButtonDirective, PageHeader, TableWrapper],
   selector: 'app-catalog-page',
   styleUrl: './catalog-page.scss',
   templateUrl: './catalog-page.html',
-  providers: [CatalogStore]
+  providers: [CatalogStore],
 })
 export class CatalogPage {
   private readonly catalogStore = inject(CatalogStore);
@@ -27,7 +29,7 @@ export class CatalogPage {
     this.catalogStore.loadCatalog(this.toODataQueryState(event));
   }
 
-  public refreshCatalog(): void{
+  public refreshCatalog(): void {
     this.catalogStore.refreshCatalog();
   }
 

@@ -1,0 +1,18 @@
+<p-toolbar class="mb-2 rounded-lg!">
+  <ng-template #start></ng-template>
+  <ng-template #end>
+    <button
+      pButton
+      iconOnly
+      size="small"
+      (click)="refreshRequested.emit()"
+      aria-label="Refresh table"
+      severity="secondary"
+      pTooltip="Refresh table"
+      tooltipPosition="top"
+    >
+      <svg lucideRefreshCw class="size-4"></svg>
+    </button>
+  </ng-template>
+</p-toolbar>
+<ng-content />

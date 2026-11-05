@@ -4,7 +4,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LucideLayoutList, LucideMenu } from '@lucide/angular';
 import {
   Sidebar, SidebarAside, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarGroupLabel, SidebarHeader, SidebarLayout, SidebarMain, SidebarMenu,
+  SidebarGroupLabel, SidebarLayout, SidebarMain, SidebarMenu,
   SidebarMenuButton, SidebarMenuItem, SidebarPanel, SidebarSpacer,
 } from 'primeng/sidebar';
 import { Drawer } from 'primeng/drawer';
@@ -13,7 +13,7 @@ import { ButtonDirective } from 'primeng/button';
 @Component({
   imports: [
     Sidebar, SidebarAside, SidebarContent, SidebarGroup, SidebarGroupContent,
-    SidebarGroupLabel, SidebarHeader, SidebarLayout, SidebarMain, SidebarMenu,
+    SidebarGroupLabel, SidebarLayout, SidebarMain, SidebarMenu,
     SidebarMenuButton, SidebarMenuItem, SidebarPanel, SidebarSpacer,
     Drawer, ButtonDirective, NgTemplateOutlet, RouterOutlet, RouterLink,
     RouterLinkActive, LucideLayoutList, LucideMenu,

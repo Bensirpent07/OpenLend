@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { TableLazyLoadEvent } from 'primeng/types/table';
-import { ODataQueryState } from '../../../shared/odata/odata-query';
-import { TableModule } from 'primeng/table';
+import { ODataQueryFilter, ODataQueryState } from '../../../shared/odata/odata-query';
+import { Table, TableModule } from 'primeng/table';
 import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
 import { ButtonDirective } from 'primeng/button';
 import { CatalogStore } from '../../store/catalog-store';
@@ -34,15 +34,42 @@ export class CatalogPage {
     this.catalogStore.refreshCatalog();
   }
 
+  public clearFilters(table: Table): void {
+    table.clearFilterValues();
+    table.onPageChange({ first: 0, rows: table.rows() });
+  }
+
   private toODataQueryState(event: TableLazyLoadEvent): ODataQueryState {
     const sortField = Array.isArray(event.sortField) ? event.sortField[0] : event.sortField;
     const sortOrder = event.sortOrder === 1 || event.sortOrder === -1 ? event.sortOrder : undefined;
+    const filter: ODataQueryFilter[] = [];
+
+    for (const field of ['name', 'description']) {
+      const metadata = event.filters?.[field];
+      const rule = Array.isArray(metadata) ? metadata[0] : metadata;
+
+      if (rule && typeof rule.value === 'string') {
+        filter.push({ field, matchMode: 'contains', value: rule.value });
+      }
+    }
+
+    const statusFilters = event.filters?.['isActive'];
+    const statusFilter = Array.isArray(statusFilters) ? statusFilters[0] : statusFilters;
+
+    if (statusFilter && typeof statusFilter.value === 'boolean') {
+      filter.push({
+        field: 'isActive',
+        matchMode: 'equals',
+        value: statusFilter.value,
+      });
+    }
 
     return {
       first: event.first ?? 0,
       rows: event.rows ?? 20,
       sortField: sortField ?? undefined,
       sortOrder,
+      filter,
     };
   }
 }

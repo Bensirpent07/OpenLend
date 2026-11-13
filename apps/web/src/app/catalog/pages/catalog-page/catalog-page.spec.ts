@@ -88,6 +88,7 @@ describe('CatalogPage', () => {
       rows: 20,
       sortField: 'name',
       sortOrder: 1,
+      filter: []
     });
   });
 
@@ -104,6 +105,7 @@ describe('CatalogPage', () => {
       rows: 20,
       sortField: undefined,
       sortOrder: undefined,
+      filter: []
     });
   });
 
@@ -123,6 +125,7 @@ describe('CatalogPage', () => {
       rows: 20,
       sortField: 'name',
       sortOrder: -1,
+      filter: []
     });
   });
 
@@ -156,5 +159,150 @@ describe('CatalogPage', () => {
     dialog.created.emit();
 
     expect(catalogStoreStub.refreshCatalog).toHaveBeenCalledOnce();
+  });
+
+  it('requests catalog data with name filtering when table is filtered', () => {
+    catalogStoreStub.loadCatalog.mockClear();
+    const expectedFilter: ODataQueryState = {
+      first: 20,
+      rows: 20,
+      filter: [{
+        field: 'name',
+        matchMode: 'contains',
+        value: 'Drill'
+      }]
+    }
+
+    table.onLazyLoad.emit({
+      first: 20,
+      rows: 20,
+      filters: {
+        name: [{
+          matchMode: 'contains',
+          value: 'Drill',
+          operator: 'and'
+        }]
+      }
+    })
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedFilter)
+  });
+
+  it('requests catalog data with description filtering', () => {
+    catalogStoreStub.loadCatalog.mockClear();
+    const expectedFilter: ODataQueryState = {
+      first: 20,
+      rows: 20,
+      filter: [{
+        field: 'description',
+        matchMode: 'contains',
+        'value': '12V Cordless Drill'
+      }]
+    }
+
+    table.onLazyLoad.emit({
+      first: 20,
+      rows: 20,
+      filters: {
+        description: [{
+          matchMode: 'contains',
+          value: '12V Cordless Drill',
+          operator: 'and'
+        }]
+      }
+    })
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedFilter)
+  });
+
+  it('should request catalog data with status filtering', () => {
+    catalogStoreStub.loadCatalog.mockClear();
+    const expectedFilter: ODataQueryState = {
+      first: 20,
+      rows: 20,
+      filter: [{
+        field: 'isActive',
+        matchMode: 'equals',
+        value: true
+      }]
+    }
+
+    table.onLazyLoad.emit({
+      first: 20,
+      rows: 20,
+      filters: {
+        isActive: [{
+          matchMode: 'equals',
+          value: true,
+          operator: 'and'
+        }]
+      }
+    })
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedFilter)
+  });
+
+  it('should send multiple filters in a data request', () => {
+    catalogStoreStub.loadCatalog.mockClear();
+    const expectedFilter: ODataQueryState = {
+      first: 20,
+      rows: 20,
+      filter: [
+        {
+          field: 'name',
+          matchMode: 'contains',
+          value: 'Drill'
+        },
+        {
+          field: 'description',
+          matchMode: 'contains',
+          value: '12V Cordless Drill'
+        }
+      ]
+    }
+
+    table.onLazyLoad.emit({
+      first: 20,
+      rows: 20,
+      filters: {
+        name: [{
+          matchMode: 'contains',
+          value: 'Drill',
+          operator: 'and'
+        }],
+        description: [{
+          matchMode: 'contains',
+          value: '12V Cordless Drill',
+          operator: 'and'
+        }]
+      }
+    })
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedFilter)
+  })
+  it('clears filters and requests the first page without filters while preserving sorting', () => {
+    table.filters['name'] = [{ matchMode: 'contains', value: 'Drill', operator: 'and' }];
+    table.filters['description'] = [{ matchMode: 'contains', value: 'Cordless', operator: 'and' }];
+    table.filters['isActive'] = [{ matchMode: 'equals', value: false, operator: 'and' }];
+    table.sortField = 'name';
+    table.sortOrder = -1;
+    table.onPageChange({ first: 20, rows: 20 });
+    catalogStoreStub.loadCatalog.mockClear();
+
+    const button = fixture.debugElement.query(By.css('button[aria-label="Clear filters"]'));
+    (button.nativeElement as HTMLButtonElement).click();
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
+      first: 0,
+      rows: 20,
+      sortField: 'name',
+      sortOrder: -1,
+      filter: [],
+    });
   });
 });

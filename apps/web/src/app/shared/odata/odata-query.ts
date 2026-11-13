@@ -1,15 +1,13 @@
-export interface ODataQueryFilter{
-  field: string;
-  value: string;
-  matchMode: 'contains';
-}
+export type ODataQueryFilter =
+  | { field: string; matchMode: 'contains'; value: string }
+  | { field: string; matchMode: 'equals'; value: string | boolean };
 
 export interface ODataQueryState {
   first: number;
   rows: number;
   sortField?: string;
   sortOrder?: 1 | -1;
-  filter?: ODataQueryFilter;
+  filter?: ODataQueryFilter[];
 }
 
 export function buildODataQuery(
@@ -22,9 +20,13 @@ export function buildODataQuery(
     result += `&$orderby=${state.sortField} ${direction}`
   }
 
-  if(state.filter){
-    const escapedValue = state.filter.value.replaceAll("'", "''");
-    result += `&$filter=${state.filter.matchMode}(${state.filter.field},'${escapedValue}')`
+  if (state.filter?.length) {
+    const clauses = state.filter.map(({ field, matchMode, value }) => {
+      const literal = typeof value === 'string' ? `'${value.replaceAll("'", "''")}'` : String(value);
+      return matchMode === 'contains' ? `contains(${field},${literal})` : `${field} eq ${literal}`;
+    });
+
+    result += `&$filter=${encodeURIComponent(clauses.join(' and '))}`;
   }
 
   return result;

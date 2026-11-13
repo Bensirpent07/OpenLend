@@ -20,9 +20,19 @@ describe('TableWrapper', () => {
     const refreshRequested = vi.fn();
     component.refreshRequested.subscribe(refreshRequested);
 
-    const button = fixture.debugElement.query(By.css('button'));
+    const button = fixture.debugElement.query(By.css('button[aria-label="Refresh table"]'));
     (button.nativeElement as HTMLButtonElement).click();
 
     expect(refreshRequested).toHaveBeenCalledOnce();
   });
+
+  it('emits one clear filters request when the clear button is clicked', () => {
+    const clearRequested = vi.fn();
+    component.clearRequested.subscribe(clearRequested);
+
+    const button = fixture.debugElement.query(By.css('button[aria-label="Clear filters"]'));
+    (button.nativeElement as HTMLButtonElement).click();
+
+    expect(clearRequested).toHaveBeenCalledOnce();
+  })
 });

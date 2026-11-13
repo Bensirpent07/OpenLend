@@ -1,8 +1,12 @@
 
-<app-page-header pageTitle="Catalog">
+<app-page-header
+  pageTitle="Catalog"
+  description="Manage and view items in the catalog."
+>
   <button
     pButton
     (click)="createDialogVisible.set(true)">
+    <svg lucidePlus [size]="16"></svg>
     Add Equipment
   </button>
 </app-page-header>
@@ -16,7 +20,6 @@
     [totalRecords]="totalRecords()"
     [loading]="loading()"
     (onLazyLoad)="loadCatalog($event)"
-    class="rounded-xl overflow-hidden"
   >
     <ng-template #header>
       <tr>

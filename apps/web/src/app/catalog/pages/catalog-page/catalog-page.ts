@@ -7,9 +7,10 @@ import { ButtonDirective } from 'primeng/button';
 import { CatalogStore } from '../../store/catalog-store';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { TableWrapper } from '../../../shared/components/table-wrapper/table-wrapper';
+import { LucidePlus } from '@lucide/angular';
 
 @Component({
-  imports: [TableModule, CreateCatalogItemDialog, ButtonDirective, PageHeader, TableWrapper],
+  imports: [TableModule, CreateCatalogItemDialog, ButtonDirective, PageHeader, TableWrapper, LucidePlus],
   selector: 'app-catalog-page',
   styleUrl: './catalog-page.scss',
   templateUrl: './catalog-page.html',

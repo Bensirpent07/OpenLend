@@ -32,7 +32,7 @@ describe('buildODataQuery', () => {
     expect(query).toBe('$skip=10&$top=20&$count=true&$orderby=isActive desc');
   });
 
-  it('builds query filter options', () => {
+  it('builds query filter with contains options', () => {
     const queryFilter: ODataQueryFilter = {
       field: 'name',
       value: 'Drill',
@@ -41,10 +41,50 @@ describe('buildODataQuery', () => {
     const query = buildODataQuery({
       first: 20,
       rows: 10,
+      filter: [queryFilter]
+    })
+
+    expect(new URLSearchParams(query).get('$filter')).toBe("contains(name,'Drill')");
+  })
+
+  it('builds query filter with equals options', () => {
+    const queryFilter: ODataQueryFilter = {
+      field: 'name',
+      value: 'Drill',
+      matchMode: 'equals'
+    };
+    const query = buildODataQuery({
+      first: 20,
+      rows: 10,
+      filter: [queryFilter]
+    })
+
+    expect(new URLSearchParams(query).get('$filter')).toBe("name eq 'Drill'");
+  })
+
+  it('builds query filter with "and" filter options', () => {
+    const queryFilter: ODataQueryFilter[] = [
+      {
+        field: 'name',
+        value: 'Drill',
+        matchMode: 'contains'
+      },
+      {
+        field: 'description',
+        value: '12V Cordless Drill',
+        matchMode: 'equals'
+      }
+    ]
+
+    const query = buildODataQuery({
+      first: 20,
+      rows: 10,
       filter: queryFilter
     })
 
-    expect(query).toBe(`$skip=20&$top=10&$count=true&$filter=contains(name,'Drill')`)
+    expect(new URLSearchParams(query).get('$filter')).toBe(
+      "contains(name,'Drill') and description eq '12V Cordless Drill'",
+    );
   })
 
   it('builds query filter options with escaping', () => {
@@ -56,9 +96,24 @@ describe('buildODataQuery', () => {
     const query = buildODataQuery({
       first: 20,
       rows: 10,
-      filter: queryFilter
+      filter: [queryFilter]
     })
 
-    expect(query).toBe(`$skip=20&$top=10&$count=true&$filter=contains(name,'O''Reillys')`)
+    expect(new URLSearchParams(query).get('$filter')).toBe("contains(name,'O''Reillys')");
+  })
+
+  it('builds query filter with a boolean value', () => {
+    const queryFilter: ODataQueryFilter = {
+      field: 'isActive',
+      value: true,
+      matchMode: 'equals'
+    }
+    const query = buildODataQuery({
+      first: 20,
+      rows: 10,
+      filter: [queryFilter]
+    })
+
+    expect(new URLSearchParams(query).get('$filter')).toBe('isActive eq true');
   })
 });

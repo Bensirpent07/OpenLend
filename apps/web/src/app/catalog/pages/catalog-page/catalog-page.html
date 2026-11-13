@@ -11,8 +11,12 @@
   </button>
 </app-page-header>
 
-<app-table-wrapper (refreshRequested)="refreshCatalog()">
+<app-table-wrapper
+  (refreshRequested)="refreshCatalog()"
+  (clearRequested)="clearFilters(catalogTable)"
+>
   <p-table
+    #catalogTable
     [value]="items()"
     [lazy]="true"
     [paginator]="true"
@@ -23,9 +27,42 @@
   >
     <ng-template #header>
       <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Status</th>
+        <th>
+          Name
+          <p-column-filter
+            type="text"
+            field="name"
+            display="menu"
+            matchMode="contains"
+            [maxConstraints]="1"
+            [showMatchModes]="false"
+            [showOperator]="false"
+          />
+        </th>
+        <th>
+          Description
+          <p-column-filter
+            type="text"
+            field="description"
+            display="menu"
+            matchMode="contains"
+            [maxConstraints]="1"
+            [showMatchModes]="false"
+            [showOperator]="false"
+          />
+        </th>
+        <th>
+          Status
+          <p-column-filter
+            type="boolean"
+            field="isActive"
+            display="menu"
+            matchMode="equals"
+            [maxConstraints]="1"
+            [showMatchModes]="false"
+            [showOperator]="false"
+          />
+        </th>
       </tr>
     </ng-template>
 

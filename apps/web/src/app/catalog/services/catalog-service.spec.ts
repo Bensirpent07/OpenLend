@@ -3,6 +3,7 @@ import { CatalogService } from './catalog-service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
 import { CreateCatalogItemRequest } from '../dto/create-catalog-item-request';
+import { buildODataQuery } from '../../shared/odata/odata-query';
 
 describe('CatalogService', () => {
   let service: CatalogService;
@@ -54,6 +55,29 @@ describe('CatalogService', () => {
     expect(response['@odata.count']).toBe(1);
     expect(response.value).toHaveLength(1);
     expect(response.value[0].name).toBe('Cordless Drill');
+  });
+
+  it('sends filter text containing an ampersand as one query parameter', async () => {
+    const query = buildODataQuery({
+      first: 0,
+      rows: 20,
+      filter: [{ field: 'description', matchMode: 'contains', value: 'Tools & Parts' }],
+    });
+    const response = firstValueFrom(service.getCatalogItems(query));
+    const request = httpTesting.expectOne(
+      (request) => request.method === 'GET' && request.url.startsWith('/odata/CatalogItems?'),
+    );
+    const { searchParams } = new URL(request.request.urlWithParams, 'http://localhost');
+
+    request.flush({ '@odata.count': 0, value: [] });
+    await response;
+
+    expect([...searchParams]).toEqual([
+      ['$skip', '0'],
+      ['$top', '20'],
+      ['$count', 'true'],
+      ['$filter', "contains(description,'Tools & Parts')"],
+    ]);
   });
 
   it('creates catalog item with supplied request data', async () => {

@@ -1,0 +1,31 @@
+<div class="overflow-hidden rounded-xl border border-surface bg-(--p-content-background)">
+  <p-toolbar class="rounded-none! border-x-0! border-t-0!">
+    <ng-template #start></ng-template>
+    <ng-template #end>
+      <button
+        pButton
+        size="small"
+        (click)="clearRequested.emit()"
+        aria-label="Clear filters"
+        severity="secondary"
+        class="me-2"
+      >
+        <svg lucideX class="size-4"></svg>
+        Clear filters
+      </button>
+      <button
+        pButton
+        iconOnly
+        size="small"
+        (click)="refreshRequested.emit()"
+        aria-label="Refresh table"
+        severity="secondary"
+        pTooltip="Refresh table"
+        tooltipPosition="top"
+      >
+        <svg lucideRefreshCw class="size-4"></svg>
+      </button>
+    </ng-template>
+  </p-toolbar>
+  <ng-content />
+</div>

@@ -1,1 +1,77 @@
-<router-outlet />
+<ng-template #navigation>
+  <nav aria-label="Primary">
+    <p-sidebar-group>
+      <p-sidebar-group-label>Navigation</p-sidebar-group-label>
+      <p-sidebar-group-content>
+        <p-sidebar-menu>
+          <p-sidebar-menu-item>
+            <a
+              #navigationLink
+              pSidebarMenuButton
+              routerLink="/catalog"
+              routerLinkActive
+              #catalogRoute="routerLinkActive"
+              [isActive]="catalogRoute.isActive"
+              ariaCurrentWhenActive="page"
+              (click)="closeMobileNavigation()">
+              <svg lucideLayoutList aria-hidden="true"></svg>
+              <span>Catalog</span>
+            </a>
+          </p-sidebar-menu-item>
+        </p-sidebar-menu>
+      </p-sidebar-group-content>
+    </p-sidebar-group>
+  </nav>
+</ng-template>
+
+<a class="skip-link" href="#main-content" (click)="skipToContent($event)">Skip to content</a>
+<p-sidebar-layout class="flex-col">
+  <header class="flex min-h-16 shrink-0 items-center gap-3 border-b border-surface bg-(--p-content-background) px-4 py-3 text-color">
+    @if (isMobile()) {
+      <button
+        #navigationToggle
+        pButton
+        type="button"
+        aria-label="Open navigation"
+        aria-controls="mobile-navigation"
+        [attr.aria-expanded]="mobileNavigationOpen()"
+        (click)="mobileNavigationOpen.set(true)">
+        <svg lucideMenu aria-hidden="true"></svg>
+      </button>
+    }
+    <span class="font-extrabold">OpenLend</span>
+  </header>
+
+  <div class="flex min-w-0 flex-1">
+    @if (!isMobile()) {
+      <p-sidebar variant="inset">
+        <p-sidebar-spacer />
+        <p-sidebar-aside>
+          <p-sidebar-panel>
+            <p-sidebar-content>
+              <ng-container [ngTemplateOutlet]="navigation" />
+            </p-sidebar-content>
+          </p-sidebar-panel>
+        </p-sidebar-aside>
+      </p-sidebar>
+    } @else {
+      <p-drawer
+        id="mobile-navigation"
+        [(visible)]="mobileNavigationOpen"
+        header="OpenLend"
+        ariaCloseLabel="Close navigation"
+        [blockScroll]="true"
+        [style]="{ width: 'min(20rem, 100vw)' }"
+        [pt]="{ root: { role: 'dialog', 'aria-label': 'Primary navigation', 'aria-modal': true } }"
+        (onShow)="focusMobileNavigation()"
+        (onHide)="restoreNavigationFocus()">
+        <ng-container [ngTemplateOutlet]="navigation" />
+      </p-drawer>
+    }
+    <p-sidebar-main class="min-w-0 rounded-3xl!">
+      <main #mainContent id="main-content" tabindex="-1" class="min-w-0 p-4 md:p-6">
+        <router-outlet />
+      </main>
+    </p-sidebar-main>
+  </div>
+</p-sidebar-layout>

@@ -1,6 +1,21 @@
 <div class="overflow-hidden rounded-xl border border-surface bg-(--p-content-background)">
   <p-toolbar class="rounded-none! border-x-0! border-t-0!">
-    <ng-template #start></ng-template>
+    <ng-template #start>
+      @if (multiSortEnabled()) {
+        <div class="flex items-center gap-2 text-sm text-muted-color">
+          <svg lucideInfo class="size-3.5 shrink-0" aria-hidden="true"></svg>
+          <span>
+            <kbd class="inline-flex items-center rounded border border-surface bg-emphasis px-1.5 align-middle font-mono text-xs text-color">Ctrl</kbd>
+            /
+            <kbd class="inline-flex items-center gap-1 rounded border border-surface bg-emphasis px-1.5 align-middle font-mono text-xs text-color">
+              <svg lucideCommand class="size-3 shrink-0" aria-hidden="true"></svg>
+              Command
+            </kbd>
+            + click a header to add it to the sort.
+          </span>
+        </div>
+      }
+    </ng-template>
     <ng-template #end>
       <button
         pButton

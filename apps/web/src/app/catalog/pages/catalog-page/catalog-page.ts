@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { TableLazyLoadEvent } from 'primeng/types/table';
-import { ODataQueryFilter, ODataQueryState } from '../../../shared/odata/odata-query';
+import { ODataQueryFilter, ODataQueryState, ODataSortField } from '../../../shared/odata/odata-query';
 import { Table, TableModule } from 'primeng/table';
 import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
 import { ButtonDirective } from 'primeng/button';
@@ -40,9 +40,14 @@ export class CatalogPage {
   }
 
   private toODataQueryState(event: TableLazyLoadEvent): ODataQueryState {
-    const sortField = Array.isArray(event.sortField) ? event.sortField[0] : event.sortField;
-    const sortOrder = event.sortOrder === 1 || event.sortOrder === -1 ? event.sortOrder : undefined;
     const filter: ODataQueryFilter[] = [];
+    const sortFields: ODataSortField[] = [];
+
+    for (const { field, order } of event.multiSortMeta ?? []) {
+      if (order === 1 || order === -1) {
+        sortFields.push({ field, order });
+      }
+    }
 
     for (const field of ['name', 'description']) {
       const metadata = event.filters?.[field];
@@ -67,9 +72,8 @@ export class CatalogPage {
     return {
       first: event.first ?? 0,
       rows: event.rows ?? 20,
-      sortField: sortField ?? undefined,
-      sortOrder,
       filter,
+      sortFields,
     };
   }
 }

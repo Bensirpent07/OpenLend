@@ -19,49 +19,63 @@
     #catalogTable
     [value]="items()"
     [lazy]="true"
+    [lazyLoadOnInit]="false"
     [paginator]="true"
     [rows]="20"
     [totalRecords]="totalRecords()"
     [loading]="loading()"
     (onLazyLoad)="loadCatalog($event)"
+    sortMode="multiple"
+    [multiSortMeta]="[{ field: 'name', order: 1 }]"
   >
     <ng-template #header>
       <tr>
-        <th>
-          Name
-          <p-column-filter
-            type="text"
-            field="name"
-            display="menu"
-            matchMode="contains"
-            [maxConstraints]="1"
-            [showMatchModes]="false"
-            [showOperator]="false"
-          />
+        <th pSortableColumn="name">
+          <div class="flex items-center">
+            <span class="me-3">Name</span>
+            <p-column-filter
+              type="text"
+              field="name"
+              display="menu"
+              matchMode="contains"
+              [maxConstraints]="1"
+              [showMatchModes]="false"
+              [showOperator]="false"
+              (keydown.space)="$event.stopPropagation()"
+            />
+            <p-sort-icon field="name" class="ms-auto" />
+          </div>
         </th>
-        <th>
-          Description
-          <p-column-filter
-            type="text"
-            field="description"
-            display="menu"
-            matchMode="contains"
-            [maxConstraints]="1"
-            [showMatchModes]="false"
-            [showOperator]="false"
-          />
+        <th pSortableColumn="description">
+          <div class="flex items-center">
+            <span class="me-3">Description</span>
+            <p-column-filter
+              type="text"
+              field="description"
+              display="menu"
+              matchMode="contains"
+              [maxConstraints]="1"
+              [showMatchModes]="false"
+              [showOperator]="false"
+              (keydown.space)="$event.stopPropagation()"
+            />
+            <p-sort-icon field="description" class="ms-auto" />
+          </div>
         </th>
-        <th>
-          Status
-          <p-column-filter
-            type="boolean"
-            field="isActive"
-            display="menu"
-            matchMode="equals"
-            [maxConstraints]="1"
-            [showMatchModes]="false"
-            [showOperator]="false"
-          />
+        <th pSortableColumn="isActive">
+          <div class="flex items-center">
+            <span class="me-3">Status</span>
+            <p-column-filter
+              type="boolean"
+              field="isActive"
+              display="menu"
+              matchMode="equals"
+              [maxConstraints]="1"
+              [showMatchModes]="false"
+              [showOperator]="false"
+            />
+            <p-sort-icon field="isActive" class="ms-auto" />
+          </div>
         </th>
       </tr>
     </ng-template>

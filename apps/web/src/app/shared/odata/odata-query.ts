@@ -2,11 +2,15 @@ export type ODataQueryFilter =
   | { field: string; matchMode: 'contains'; value: string }
   | { field: string; matchMode: 'equals'; value: string | boolean };
 
+export interface ODataSortField {
+  field: string;
+  order: 1 | -1;
+}
+
 export interface ODataQueryState {
   first: number;
   rows: number;
-  sortField?: string;
-  sortOrder?: 1 | -1;
+  sortFields?: ODataSortField[];
   filter?: ODataQueryFilter[];
 }
 
@@ -15,9 +19,11 @@ export function buildODataQuery(
 ): string {
   let result = `$skip=${state.first.toString()}&$top=${state.rows.toString()}&$count=true`;
 
-  if(state.sortField){
-    const direction = state.sortOrder === -1 ? 'desc' : 'asc';
-    result += `&$orderby=${state.sortField} ${direction}`
+  if (state.sortFields?.length) {
+    const clauses = state.sortFields.map(({ field, order }) =>
+      `${field} ${order === 1 ? 'asc' : 'desc'}`,
+    );
+    result += `&$orderby=${clauses.join(', ')}`;
   }
 
   if (state.filter?.length) {

@@ -73,6 +73,7 @@
               [maxConstraints]="1"
               [showMatchModes]="false"
               [showOperator]="false"
+              (keydown.space)="$event.stopPropagation()"
             />
             <p-sort-icon field="isActive" class="ms-auto" />
           </div>

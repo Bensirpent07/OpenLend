@@ -38,8 +38,7 @@ describe('CatalogStore', () => {
     const query: ODataQueryState = {
       first: 20,
       rows: 20,
-      sortField: 'name',
-      sortOrder: 1,
+      sortFields: [{ field: 'name', order: 1 }]
     };
 
     expect(store.loading()).toBe(false);
@@ -163,8 +162,7 @@ describe('CatalogStore', () => {
     store.loadCatalog({
       first: 20,
       rows: 20,
-      sortField: 'name',
-      sortOrder: -1,
+      sortFields: [{ field: 'name', order: -1 }]
     });
 
     response$.next({ '@odata.count': 37, value: [] });

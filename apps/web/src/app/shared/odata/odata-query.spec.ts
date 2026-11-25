@@ -14,8 +14,7 @@ describe('buildODataQuery', () => {
     const query = buildODataQuery({
       first: 20,
       rows: 10,
-      sortField: 'name',
-      sortOrder: 1,
+      sortFields: [{ field: 'name', order: 1 }]
     });
 
     expect(query).toBe('$skip=20&$top=10&$count=true&$orderby=name asc');
@@ -25,12 +24,24 @@ describe('buildODataQuery', () => {
     const query = buildODataQuery({
       first: 10,
       rows: 20,
-      sortField: 'isActive',
-      sortOrder: -1,
+      sortFields: [{ field: 'isActive', order: -1 }]
     });
 
     expect(query).toBe('$skip=10&$top=20&$count=true&$orderby=isActive desc');
   });
+
+  it('builds multiple sorty query options', () => {
+    const query = buildODataQuery({
+      first: 10,
+      rows: 20,
+      sortFields: [
+        { field: 'isActive', order: 1 },
+        { field: 'name', order: -1 }
+      ]
+    })
+
+    expect(query).toBe('$skip=10&$top=20&$count=true&$orderby=isActive asc, name desc');
+  })
 
   it('builds query filter with contains options', () => {
     const queryFilter: ODataQueryFilter = {
@@ -115,5 +126,15 @@ describe('buildODataQuery', () => {
     })
 
     expect(new URLSearchParams(query).get('$filter')).toBe('isActive eq true');
+  })
+
+  it('should not build `orderby` query when no sorting is provided', () => {
+    const query = buildODataQuery({
+      first: 20,
+      rows: 10,
+      sortFields: []
+    })
+
+    expect(new URLSearchParams(query).get('$orderby')).toBeNull();
   })
 });

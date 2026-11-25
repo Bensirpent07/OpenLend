@@ -61,72 +61,57 @@ describe('CatalogPage', () => {
       .injector.get(CreateCatalogItemDialog);
   });
 
-  it('requests the first page when the table initializes', () => {
+  it('requests the first page sorted by name when the table initializes', () => {
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(
       expect.objectContaining({
         first: 0,
         rows: 20,
-        sortField: undefined,
+        filter: [],
+        sortFields: [{ field: 'name', order: 1 }],
       }),
     );
   });
 
   it('passes table paging and sorting changes to the store', () => {
     catalogStoreStub.loadCatalog.mockClear();
+    const expectedState: ODataQueryState = {
+      first: 20,
+      rows: 20,
+      filter: [],
+      sortFields: [{ field: 'name', order: 1 }]
+    }
 
     table.onLazyLoad.emit({
       first: 20,
       rows: 20,
-      sortField: 'name',
-      sortOrder: 1,
+      multiSortMeta: [
+        { field: 'name', order: 1 }
+      ]
     });
 
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
-    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
-      first: 20,
-      rows: 20,
-      sortField: 'name',
-      sortOrder: 1,
-      filter: []
-    });
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedState);
   });
 
   it('uses default paging and omits an unsupported sort order', () => {
     catalogStoreStub.loadCatalog.mockClear();
+    const expectedState: ODataQueryState = {
+      first: 0,
+      rows: 20,
+      filter: [],
+      sortFields: [{ field: 'description', order: -1 }],
+    };
 
     table.onLazyLoad.emit({
-      sortOrder: 0,
+      multiSortMeta: [
+        { field: 'name', order: 0 },
+        { field: 'description', order: -1 },
+      ],
     });
 
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
-    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
-      first: 0,
-      rows: 20,
-      sortField: undefined,
-      sortOrder: undefined,
-      filter: []
-    });
-  });
-
-  it('uses the first sort field when the table supplies an array', () => {
-    catalogStoreStub.loadCatalog.mockClear();
-
-    table.onLazyLoad.emit({
-      first: 0,
-      rows: 20,
-      sortField: ['name', 'description'],
-      sortOrder: -1,
-    });
-
-    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
-    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
-      first: 0,
-      rows: 20,
-      sortField: 'name',
-      sortOrder: -1,
-      filter: []
-    });
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedState);
   });
 
   it('opens the creation dialog when Add Equipment is clicked', async () => {
@@ -163,14 +148,15 @@ describe('CatalogPage', () => {
 
   it('requests catalog data with name filtering when table is filtered', () => {
     catalogStoreStub.loadCatalog.mockClear();
-    const expectedFilter: ODataQueryState = {
+    const expectedState: ODataQueryState = {
       first: 20,
       rows: 20,
       filter: [{
         field: 'name',
         matchMode: 'contains',
         value: 'Drill'
-      }]
+      }],
+      sortFields: []
     }
 
     table.onLazyLoad.emit({
@@ -186,7 +172,7 @@ describe('CatalogPage', () => {
     })
 
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
-    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedFilter)
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedState)
   });
 
   it('requests catalog data with description filtering', () => {
@@ -198,7 +184,8 @@ describe('CatalogPage', () => {
         field: 'description',
         matchMode: 'contains',
         'value': '12V Cordless Drill'
-      }]
+      }],
+      sortFields: []
     }
 
     table.onLazyLoad.emit({
@@ -226,7 +213,8 @@ describe('CatalogPage', () => {
         field: 'isActive',
         matchMode: 'equals',
         value: true
-      }]
+      }],
+      sortFields: []
     }
 
     table.onLazyLoad.emit({
@@ -261,7 +249,8 @@ describe('CatalogPage', () => {
           matchMode: 'contains',
           value: '12V Cordless Drill'
         }
-      ]
+      ],
+      sortFields: []
     }
 
     table.onLazyLoad.emit({
@@ -284,25 +273,51 @@ describe('CatalogPage', () => {
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedFilter)
   })
+
   it('clears filters and requests the first page without filters while preserving sorting', () => {
     table.filters['name'] = [{ matchMode: 'contains', value: 'Drill', operator: 'and' }];
     table.filters['description'] = [{ matchMode: 'contains', value: 'Cordless', operator: 'and' }];
     table.filters['isActive'] = [{ matchMode: 'equals', value: false, operator: 'and' }];
-    table.sortField = 'name';
-    table.sortOrder = -1;
+    table.multiSortMeta = [{ field: 'name', order: -1 }]
     table.onPageChange({ first: 20, rows: 20 });
     catalogStoreStub.loadCatalog.mockClear();
+
+    const expectedState: ODataQueryState = {
+      first: 0,
+      rows: 20,
+      sortFields: [{ field: 'name', order: -1 }],
+      filter: []
+    }
 
     const button = fixture.debugElement.query(By.css('button[aria-label="Clear filters"]'));
     (button.nativeElement as HTMLButtonElement).click();
 
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
-    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith({
-      first: 0,
-      rows: 20,
-      sortField: 'name',
-      sortOrder: -1,
-      filter: [],
-    });
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedState);
   });
+
+  it('should send multi sort information in a data request', () => {
+    catalogStoreStub.loadCatalog.mockClear();
+    const expectedState: ODataQueryState = {
+      first: 20,
+      rows: 20,
+      filter: [],
+      sortFields: [
+        { field: 'name', order: 1 },
+        { field: 'description', order: -1 }
+      ]
+    }
+
+    table.onLazyLoad.emit({
+      first: 20,
+      rows: 20,
+      multiSortMeta: [
+        { field: 'name', order: 1 },
+        { field: 'description', order: -1 }
+      ]
+    })
+
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedState);
+  })
 });

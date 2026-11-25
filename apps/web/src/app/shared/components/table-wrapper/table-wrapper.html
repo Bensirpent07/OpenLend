@@ -1,7 +1,19 @@
+@let refreshFailure = refreshError();
 <div class="overflow-hidden rounded-xl border border-surface bg-(--p-content-background)">
   <p-toolbar class="rounded-none! border-x-0! border-t-0!">
     <ng-template #start>
-      @if (multiSortEnabled()) {
+      <div [hidden]="!refreshFailure">
+        <p-message severity="error" variant="simple" [attr.role]="refreshFailure ? 'alert' : null">
+          <ng-template #icon>
+            <svg lucideCircleAlert class="size-3.5 shrink-0" aria-hidden="true"></svg>
+          </ng-template>
+          <span class="font-medium">{{ refreshFailure }}</span>
+          <span class="text-sm text-muted-color">
+            Showing the last loaded results.
+          </span>
+        </p-message>
+      </div>
+      @if (!refreshFailure && multiSortEnabled()) {
         <div class="flex items-center gap-2 text-sm text-muted-color">
           <svg lucideInfo class="size-3.5 shrink-0" aria-hidden="true"></svg>
           <span>
@@ -30,15 +42,20 @@
       </button>
       <button
         pButton
-        iconOnly
+        type="button"
+        [iconOnly]="!refreshFailure"
         size="small"
         (click)="refreshRequested.emit()"
-        aria-label="Refresh table"
+        [attr.aria-label]="refreshFailure ? null : 'Refresh table'"
         severity="secondary"
         pTooltip="Refresh table"
+        [tooltipDisabled]="!!refreshFailure"
         tooltipPosition="top"
       >
-        <svg lucideRefreshCw class="size-4"></svg>
+        <svg lucideRefreshCw class="size-4" aria-hidden="true"></svg>
+        @if (refreshFailure) {
+          Retry
+        }
       </button>
     </ng-template>
   </p-toolbar>

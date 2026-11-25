@@ -1,16 +1,31 @@
 import { Component, inject, signal } from '@angular/core';
 import { TableLazyLoadEvent } from 'primeng/types/table';
-import { ODataQueryFilter, ODataQueryState, ODataSortField } from '../../../shared/odata/odata-query';
+import {
+  ODataQueryFilter,
+  ODataQueryState,
+  ODataSortField,
+} from '../../../shared/odata/odata-query';
 import { Table, TableModule } from 'primeng/table';
 import { CreateCatalogItemDialog } from '../../components/create-catalog-item-dialog/create-catalog-item-dialog';
 import { ButtonDirective } from 'primeng/button';
 import { CatalogStore } from '../../store/catalog-store';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { TableWrapper } from '../../../shared/components/table-wrapper/table-wrapper';
-import { LucidePlus } from '@lucide/angular';
+import { LucideCircleAlert, LucideLoaderCircle, LucidePlus } from '@lucide/angular';
+import { MessageModule } from 'primeng/message';
 
 @Component({
-  imports: [TableModule, CreateCatalogItemDialog, ButtonDirective, PageHeader, TableWrapper, LucidePlus],
+  imports: [
+    TableModule,
+    CreateCatalogItemDialog,
+    ButtonDirective,
+    PageHeader,
+    TableWrapper,
+    LucideCircleAlert,
+    LucideLoaderCircle,
+    LucidePlus,
+    MessageModule,
+  ],
   selector: 'app-catalog-page',
   styleUrl: './catalog-page.scss',
   templateUrl: './catalog-page.html',

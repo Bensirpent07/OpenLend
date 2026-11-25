@@ -11,7 +11,37 @@
   </button>
 </app-page-header>
 
+@let hasRows = items().length > 0;
+@let loadFailure = hasRows ? null : errorMessage();
+@let loadingWithoutRows = !hasRows && loading();
+@let showLoadPanel = loadingWithoutRows || !!loadFailure;
+<div [hidden]="!showLoadPanel" class="flex min-h-52 flex-col items-center justify-center gap-4 rounded-xl border border-surface bg-(--p-content-background) px-6 py-8 text-center">
+  @if (loadingWithoutRows) {
+    <div role="status" class="flex flex-col items-center gap-3">
+      <span class="grid size-10 place-items-center rounded-full bg-emphasis text-muted-color">
+        <svg lucideLoaderCircle class="size-5 motion-safe:animate-spin" aria-hidden="true"></svg>
+      </span>
+      <p class="font-semibold text-color">Loading catalog items…</p>
+    </div>
+  }
+  <div [hidden]="loadingWithoutRows || !loadFailure" class="flex flex-col items-center gap-4">
+    <p-message severity="error" variant="simple" [attr.role]="loadFailure && !loadingWithoutRows ? 'alert' : null">
+      <span class="flex flex-col items-center gap-3">
+        <span class="grid size-10 place-items-center rounded-full bg-(--p-message-error-background)">
+          <svg lucideCircleAlert class="size-5 text-(--p-message-error-simple-color)" aria-hidden="true"></svg>
+        </span>
+        <span class="font-semibold text-color">{{ loadFailure }}</span>
+      </span>
+    </p-message>
+    <button pButton type="button" size="small" severity="secondary" (click)="refreshCatalog()">
+      Retry
+    </button>
+  </div>
+</div>
+
 <app-table-wrapper
+  [hidden]="showLoadPanel"
+  [refreshError]="hasRows ? errorMessage() : null"
   (refreshRequested)="refreshCatalog()"
   (clearRequested)="clearFilters(catalogTable)"
 >
@@ -21,9 +51,10 @@
     [lazy]="true"
     [lazyLoadOnInit]="false"
     [paginator]="true"
+    [alwaysShowPaginator]="false"
     [rows]="20"
     [totalRecords]="totalRecords()"
-    [loading]="loading()"
+    [loading]="hasRows && loading()"
     (onLazyLoad)="loadCatalog($event)"
     sortMode="multiple"
     [multiSortMeta]="[{ field: 'name', order: 1 }]"
@@ -90,9 +121,13 @@
     </ng-template>
 
     <ng-template #emptymessage>
-      <tr>
-        <td colspan="3">No catalog items found.</td>
-      </tr>
+      @if (!loading() && !errorMessage()) {
+        <tr>
+          <td colspan="3">
+            <p class="px-4 py-6 text-center text-sm text-muted-color">No catalog items found.</p>
+          </td>
+        </tr>
+      }
     </ng-template>
   </p-table>
 </app-table-wrapper>

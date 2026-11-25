@@ -320,4 +320,78 @@ describe('CatalogPage', () => {
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
     expect(catalogStoreStub.loadCatalog).toHaveBeenCalledWith(expectedState);
   })
+
+  it('keeps the table hidden through first load, failure, and retry', async () => {
+    const page = fixture.nativeElement as HTMLElement;
+    const tableWrapper = page.querySelector<HTMLElement>('app-table-wrapper');
+
+    catalogStoreStub.loading.set(true);
+    await fixture.whenStable();
+
+    expect(page.querySelector('[role="status"]')?.textContent).toContain('Loading catalog items');
+    expect(tableWrapper?.hidden).toBe(true);
+
+    catalogStoreStub.loading.set(false);
+    catalogStoreStub.errorMessage.set('Unable to load catalog items.');
+
+    await fixture.whenStable();
+    const alert = page.querySelector('[role="alert"]');
+    const retryButton = Array.from(page.querySelectorAll('button')).find(
+      (button) => button.textContent.trim() === 'Retry',
+    );
+
+    expect(alert?.textContent).toContain('Unable to load catalog items.');
+    expect(tableWrapper?.hidden).toBe(true);
+    expect(page.textContent).not.toContain('No catalog items found.');
+    expect(retryButton).toBeDefined();
+
+    retryButton?.click();
+    expect(catalogStoreStub.refreshCatalog).toHaveBeenCalledOnce();
+
+    catalogStoreStub.errorMessage.set(null);
+    catalogStoreStub.loading.set(true);
+    await fixture.whenStable();
+
+    expect(page.querySelector('[role="status"]')?.textContent).toContain('Loading catalog items');
+    expect(tableWrapper?.hidden).toBe(true);
+    expect(page.querySelector('[role="alert"]')).toBeNull();
+    expect(retryButton?.closest('[hidden]')).not.toBeNull();
+    expect(alert?.isConnected).toBe(true);
+
+    catalogStoreStub.loading.set(false);
+    await fixture.whenStable();
+
+    expect(tableWrapper?.hidden).toBe(false);
+    expect(catalogStoreStub.loadCatalog).toHaveBeenCalledOnce();
+  });
+
+  it('shows a failed refresh in the toolbar and keeps the existing catalog rows', async () => {
+    catalogStoreStub.items.set([{
+      id: 'drill',
+      name: 'Cordless Drill',
+      description: null,
+      isActive: true,
+      createdAtUtc: '2026-11-25T00:00:00Z',
+    }]);
+    catalogStoreStub.errorMessage.set('Unable to load catalog items.');
+
+    await fixture.whenStable();
+    const page = fixture.nativeElement as HTMLElement;
+    const tableWrapper = page.querySelector<HTMLElement>('app-table-wrapper');
+    const toolbar = tableWrapper?.querySelector('[role="toolbar"]');
+    const alert = toolbar?.querySelector('[role="alert"]');
+    const retryButton = Array.from(toolbar?.querySelectorAll('button') ?? []).find(
+      (button) => button.textContent.trim() === 'Retry',
+    );
+
+    expect(alert?.textContent).toContain('Unable to load catalog items.');
+    expect(alert?.textContent).toContain('Showing the last loaded results.');
+    expect(toolbar?.querySelector('button[aria-label="Refresh table"]')).toBeNull();
+    expect(tableWrapper?.hidden).toBe(false);
+    expect(tableWrapper?.querySelector('tbody')?.textContent).toContain('Cordless Drill');
+
+    expect(retryButton?.textContent.trim()).toBe('Retry');
+    retryButton?.click();
+    expect(catalogStoreStub.refreshCatalog).toHaveBeenCalledOnce();
+  });
 });
